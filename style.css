@@ -1,0 +1,1649 @@
+    /* ===========================================================
+       1. CSS VARIABLES — DESIGN TOKENS
+       ============================================================
+       CSS variables (also called "custom properties") let you
+       define a value once and reuse it everywhere in your CSS.
+
+       Syntax:  --variable-name: value;
+       Usage:   color: var(--variable-name);
+
+       The :root selector targets the very top of the document,
+       so these variables are available to every element on the page.
+
+       TO RETHEME THE ENTIRE SITE: change only the hex values below.
+       Every button, link, label, and bar that uses var(--accent)
+       will update automatically.
+    =========================================================== */
+    :root {
+      --accent:      #4a90e2;
+      /*
+        --accent is the primary brand color used for buttons,
+        link hover states, section labels, skill bars, and the
+        hero eyebrow pill. Change this one value to retheme
+        the entire accent color of the site.
+        #4a90e2 = a medium-bright blue.
+      */
+
+      --accent-dark: #2a6ab5;
+      /*
+        --accent-dark is one shade darker than --accent.
+        Used exclusively for hover states on buttons so they
+        visually respond when the user moves the mouse over them.
+      */
+
+      --ink:         #0f0f14;
+      /*
+        --ink is the main text color throughout the page.
+        It is near-black (not pure #000000) which is softer on
+        the eyes and looks more professional on light backgrounds.
+      */
+
+      --light-bg:    #f4f5f9;
+      /*
+        --light-bg is the page background color — a very slightly
+        blue-tinted off-white. Cooler than pure white, easier to
+        read against, and makes white cards "pop" off the page.
+      */
+
+      --white:       #ffffff;
+      /*
+        Pure white — used for card backgrounds, the header
+        background (with transparency), and section backgrounds
+        that need to contrast with --light-bg.
+      */
+
+      --soft-border: #e2e4ec;
+      /*
+        --soft-border is a very light gray used for divider lines
+        and card borders. Subtle enough to not distract, but
+        enough to create visual separation between elements.
+      */
+
+      --card-shadow: 0 16px 40px rgba(0,0,0,0.10);
+      /*
+        --card-shadow is a reusable drop shadow value.
+        Breaking it down:
+          0         = no horizontal offset (shadow is directly below)
+          16px      = 16px vertical offset (shadow falls downward)
+          40px      = blur radius (how soft/spread the shadow is)
+          rgba(0,0,0,0.10) = black at 10% opacity (very subtle)
+
+        Used on cards and feature images to lift them off the page.
+      */
+    }
+
+
+    /* ===========================================================
+       2. RESET & BASE STYLES
+       ============================================================
+       Browsers apply their own default styles to every element —
+       different margins, paddings, font sizes. This "universal
+       reset" zeros them all out so we start from a clean slate
+       and the page looks the same in every browser.
+    =========================================================== */
+
+    *, *::before, *::after {
+      /*
+        The * selector targets EVERY element on the page.
+        ::before and ::after target CSS pseudo-elements
+        (the decorative content we create with content: "").
+      */
+      margin: 0;
+      /* Removes all default outer spacing from every element */
+
+      padding: 0;
+      /* Removes all default inner spacing from every element */
+
+      box-sizing: border-box;
+      /*
+        By default, CSS calculates width EXCLUDING padding and border.
+        So a div with width: 300px and padding: 20px would actually
+        be 340px wide — confusing and hard to work with.
+
+        box-sizing: border-box changes this so that padding and
+        border are INCLUDED in the declared width.
+        A div with width: 300px and padding: 20px stays exactly
+        300px wide. This makes layouts much more predictable.
+      */
+    }
+
+    html {
+      scroll-behavior: smooth;
+      /*
+        Makes the page scroll smoothly when the user clicks an
+        anchor link (like href="#projects") instead of jumping
+        instantly. This is a small quality-of-life improvement.
+      */
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      /*
+        font-family lists fonts in priority order — the browser
+        uses the first one it finds on the user's device.
+
+        -apple-system        → San Francisco (Mac/iPhone)
+        BlinkMacSystemFont   → San Francisco (Chrome on Mac)
+        "Segoe UI"           → Windows system font
+        Roboto               → Android system font
+        sans-serif           → any sans-serif font as final fallback
+
+        This technique gives the page a "native" feel on every
+        device without loading a web font, which speeds up the page.
+      */
+
+      background: var(--light-bg);
+      /* Sets the page background to our cool off-white variable */
+
+      color: var(--ink);
+      /*
+        Sets the default text color for the whole page.
+        Child elements inherit this unless they override it.
+      */
+
+      overflow-x: hidden;
+      /*
+        Hides any content that overflows horizontally.
+        This prevents a horizontal scrollbar from appearing
+        when animated elements briefly extend past the viewport
+        (like the mobile nav panel sliding in from off-screen).
+      */
+
+      line-height: 1.65;
+      /*
+        line-height controls the vertical space between lines of text.
+        1.65 means each line is 1.65× the font size tall.
+        The browser default (1.2) is too tight for body text.
+        1.65 is comfortable and easy to read.
+      */
+    }
+
+    img, video {
+      max-width: 100%;
+      /*
+        Prevents images and videos from overflowing their container.
+        If a container is 400px wide and the image is 800px,
+        max-width: 100% shrinks the image to fit within 400px.
+      */
+
+      display: block;
+      /*
+        Images are inline by default, which adds a small gap below
+        them (space reserved for text descenders). display: block
+        removes that gap so images sit flush in their containers.
+      */
+    }
+
+
+    /* ===========================================================
+       3. HEADER / DESKTOP NAVIGATION
+       ============================================================
+       The header is fixed to the top of the viewport so it stays
+       visible as the user scrolls. It uses backdrop-filter: blur()
+       to create a frosted-glass effect.
+
+       Z-index layering used in this file:
+         header          = z-index: 1000  (topmost — always on top)
+         mobile-nav      = z-index: 999   (below header)
+         mobile-overlay  = z-index: 998   (below nav panel)
+         hero slides     = z-index: 0–2   (at the bottom)
+    =========================================================== */
+
+    header {
+      position: fixed;
+      /*
+        position: fixed removes the header from normal document flow
+        and anchors it to the viewport. It will not scroll away
+        even as the user scrolls down the page.
+      */
+
+      top: 0;
+      left: 0;
+      /*
+        Pins the header to the top-left corner of the viewport.
+        Combined with width: 100%, it spans the full browser width.
+      */
+
+      width: 100%;
+      /* Makes the header stretch edge-to-edge across the screen */
+
+      height: 64px;
+      /*
+        Sets a fixed height for the header bar.
+        The <main> element has padding-top: 64px to match,
+        so page content starts below the header instead of
+        being hidden behind it.
+      */
+
+      background: rgba(244,245,249,0.95);
+      /*
+        rgba() sets a color with transparency.
+        This is --light-bg (244,245,249) at 95% opacity.
+        The 5% transparency lets the page content slightly
+        show through, which is necessary for the blur effect
+        to look like frosted glass.
+      */
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      /*
+        backdrop-filter: blur() blurs everything BEHIND the element.
+        Combined with the semi-transparent background above, this
+        creates the "frosted glass" effect.
+
+        -webkit-backdrop-filter is the Safari-prefixed version.
+        Both lines are required for cross-browser support.
+      */
+
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      /*
+        A very faint 1px line at the bottom of the header.
+        rgba(0,0,0,0.07) = black at 7% opacity — barely visible
+        but provides subtle visual separation from the page content.
+      */
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      /*
+        Flexbox layout for the header's three children:
+          brand (left) | nav links (center) | cta+hamburger (right)
+
+        display: flex        → turns header into a flex container
+        align-items: center  → vertically centers all children
+        justify-content: space-between → pushes first child left,
+                               last child right, middle centered
+      */
+
+      padding: 0 36px;
+      /*
+        0 top/bottom padding (height controls vertical space)
+        36px left/right padding keeps content away from screen edges
+      */
+
+      z-index: 1000;
+      /*
+        z-index controls which elements appear in front of others
+        when they overlap. Higher number = closer to the viewer.
+        1000 ensures the header stays above everything else on the page,
+        including the hero section and any modals or dropdowns.
+      */
+    }
+
+    .brand {
+      /*
+        The brand/logo text link in the top-left of the header.
+      */
+      font-weight: 800;
+      /* Extra bold — makes the name stand out as a brand mark */
+
+      font-size: 1.05rem;
+      /* Slightly larger than body text (1rem = 16px) */
+
+      letter-spacing: -.01em;
+      /* Tiny negative tracking — makes bold text look tighter */
+
+      text-decoration: none;
+      /* Removes the default underline from anchor links */
+
+      color: var(--ink);
+      /* Near-black text so it's readable on the light header */
+    }
+
+    .brand span {
+      color: var(--accent);
+      /*
+        The <span> inside the brand wraps one word so it can be
+        styled differently. This applies the accent color to just
+        that word, creating a two-tone brand name effect.
+        Example: Your(dark) Name(blue)
+      */
+    }
+
+    .desktop-nav {
+      /*
+        The row of navigation links. Hidden on mobile via media query.
+      */
+      display: flex; 
+      /* Puts all nav links in a horizontal row */
+
+      gap: 32px;
+      /* 32px space between each link — comfortable click target spacing */
+
+      font-size: .92rem;
+      /* Slightly smaller than body text for a refined nav feel */
+
+      font-weight: 500;
+      /* Medium weight — readable but not as bold as headings */
+
+    }
+
+    .desktop-nav a {
+      text-decoration: none;
+      /* No underline on nav links — cleaner look */
+
+      color: #444;
+      /* Dark gray — darker than body text but not quite black */
+
+      transition: color .2s;
+      /*
+        transition animates property changes smoothly.
+        color .2s means the color change takes 0.2 seconds.
+        Without this, the hover color would snap on/off instantly.
+      */
+    }
+
+    .desktop-nav a:hover {
+      color: var(--accent);
+      /*
+        :hover applies when the user's mouse is over the element.
+        The link turns blue on hover — the transition above
+        makes this change animate smoothly over 0.2 seconds.
+      */
+    }
+
+    .desktop-nav a.active {
+      color: var(--accent);
+      font-weight: 700;
+      /*
+        .active is added to the link for the current page.
+        The heavier weight and accent color visually indicate
+        which page the user is currently on.
+      */
+    }
+
+    .header-cta {
+      /*
+        The "Hire Me" pill button in the top-right of the header.
+        Hidden on mobile (display: none in the media query below).
+      */
+      display: inline-block;
+      /* Allows padding and sizing on what is otherwise an anchor tag */
+
+      padding: 9px 22px;
+      /* 9px top/bottom, 22px left/right — comfortable button size */
+
+      border-radius: 999px;
+      /*
+        border-radius: 999px creates a "pill" shape by rounding
+        the corners more than the element is tall. Any value larger
+        than half the element's height achieves this effect.
+        999px is a safe large number that always produces a pill.
+      */
+
+      background: var(--accent);
+      /* Filled with the accent blue color */
+
+      color: #fff;
+      /* White text for contrast on the blue background */
+
+      font-size: .88rem;
+      font-weight: 600;
+      text-decoration: none;
+
+      transition: background .2s, transform .2s;
+      /* Animates both the background color change AND the lift on hover */
+    }
+
+    .header-cta:hover {
+      background: var(--accent-dark);
+      /* Darkens on hover — provides visual feedback to the user */
+
+      transform: translateY(-2px);
+      /*
+        translateY() moves the element along the vertical axis.
+        -2px moves it 2 pixels UPWARD — a subtle "lift" effect.
+        Combined with the shadow below, this feels like the button
+        is being physically raised off the page.
+      */
+    }
+
+
+    /* ===========================================================
+       4. MOBILE NAVIGATION
+       ============================================================
+       On screens narrower than 900px, the desktop nav and header
+       CTA are hidden. In their place, a hamburger button appears.
+       Clicking it triggers JavaScript to add the .open class to
+       the .mobile-nav panel, which slides it in from the RIGHT.
+    =========================================================== */
+
+    .mobile-toggle {
+      /*
+        The three-bar hamburger button. Hidden on desktop via
+        display: none. Shown on mobile via the media query (display: flex).
+      */
+      display: none;
+      /* Hidden by default — shown only below 900px */
+
+      width: 38px;
+      height: 38px;
+      /* Square button — equal width and height */
+
+      border-radius: 10px;
+      /* Slightly rounded square corners */
+
+      border: 1.5px solid rgba(0,0,0,0.12);
+      /* Very faint border — visible but not harsh */
+
+      background: var(--white);
+      /* White background so it contrasts with the frosted header */
+
+      cursor: pointer;
+      /* Changes the cursor to a hand on hover — signals it's clickable */
+
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+      /*
+        These flex properties center the three bars inside the button
+        and stack them vertically with 5px between each bar.
+        They only take effect when display is changed to flex
+        by the media query at the bottom of this stylesheet.
+      */
+
+      transition: background .2s;
+      /* Smooth background color transition on hover */
+    }
+
+    .mobile-toggle:hover {
+      background: #eef0f6;
+      /* Light blue-gray on hover — gentle feedback */
+    }
+
+    .mobile-toggle .bar,
+    .mobile-toggle .bar::before,
+    .mobile-toggle .bar::after {
+      /*
+        The three horizontal bars of the hamburger icon.
+        .bar          = the middle bar (an actual HTML element)
+        .bar::before  = the top bar (drawn with CSS, no HTML needed)
+        .bar::after   = the bottom bar (drawn with CSS, no HTML needed)
+
+        ::before and ::after are CSS pseudo-elements. They insert
+        decorative content before/after the element without adding
+        HTML. The content: "" property is required to make them visible.
+      */
+      width: 20px;
+      height: 2px;
+      /* Thin 20px wide bars */
+
+      background: var(--ink);
+      /* Dark bars that contrast against the white button */
+
+      border-radius: 2px;
+      /* Slightly rounded ends */
+
+      display: block;
+      /* Makes pseudo-elements take up space as block elements */
+
+      transition: transform .3s, opacity .3s;
+      /* Allows the bars to animate if you add an X close animation */
+    }
+
+    .mobile-toggle .bar {
+      position: relative;
+      /*
+        position: relative on .bar allows ::before and ::after
+        to be positioned relative to this element using
+        position: absolute and the top/left properties.
+      */
+    }
+
+    .mobile-toggle .bar::before {
+      content: "";
+      /* Required — pseudo-elements won't render without this */
+
+      position: absolute;
+      top: -6px;
+      left: 0;
+      /* Positions the top bar 6px above the middle bar */
+    }
+
+    .mobile-toggle .bar::after {
+      content: "";
+
+      position: absolute;
+      top: 6px;
+      left: 0;
+      /* Positions the bottom bar 6px below the middle bar */
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       MOBILE NAV PANEL — slides in from the RIGHT
+       ─────────────────────────────────────────────────────────
+       The panel starts completely off the right side of the screen
+       (right: -100%). When JavaScript adds the .open class,
+       CSS transitions it to right: 0, sliding it into view.
+    ───────────────────────────────────────────────────────── */
+    .mobile-nav {
+      position: fixed;
+      /*
+        Fixed positioning takes the element completely out of
+        document flow and anchors it to the viewport. The panel
+        will stay in the same position even as the page scrolls.
+      */
+
+      top: 0;
+      right: -100%;
+      /*
+        right: -100% pushes the panel completely off the right
+        edge of the screen, making it invisible.
+        When .open is added, right changes to 0, sliding it in.
+      */
+
+      width: 76%;
+      max-width: 300px;
+      /*
+        76% of the viewport width, but never wider than 300px.
+        This ensures the panel is a good size on phones of any width
+        while leaving some of the page visible on the left.
+      */
+
+      height: 100vh;
+      /*
+        100vh = 100% of the viewport height.
+        The panel fills the full height of the screen.
+      */
+
+      background: rgba(10,10,22,0.96);
+      /*
+        Very dark navy at 96% opacity.
+        The 4% transparency allows backdrop-filter blur to work.
+      */
+
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      /*
+        Blurs the page content behind the panel.
+        More blur (24px) than the header (18px) because the panel
+        is full-screen and needs a stronger frosted effect.
+      */
+
+      display: flex;
+      flex-direction: column;
+      /*
+        Stacks the nav links vertically inside the panel.
+        The CTA button at the bottom uses margin-top: auto to
+        push itself to the very bottom of the panel.
+      */
+
+      padding: 80px 28px 40px;
+      /*
+        80px top padding creates space below the close button
+        at the top of the panel.
+        28px left/right padding keeps content away from the edges.
+        40px bottom padding so the CTA button isn't flush to the bottom.
+      */
+
+      transition: right .32s ease;
+      /*
+        This is what creates the sliding animation.
+        When the right property changes (from -100% to 0, or back),
+        it animates over 0.32 seconds with an ease curve.
+        Without this line, the panel would snap on/off instantly.
+      */
+
+      z-index: 999;
+      /*
+        Just below the header (z-index: 1000) so the header
+        stays visible even when the nav panel is open.
+      */
+
+      border-left: 1px solid rgba(255,255,255,0.06);
+      /*
+        A very faint white line on the left edge of the panel.
+        Creates a subtle separation between the panel and the
+        dimmed page content visible to the left.
+      */
+    }
+
+    .mobile-nav.open {
+      right: 0;
+      /*
+        When JavaScript adds class="open" to the .mobile-nav element,
+        this rule takes effect. right: 0 means the right edge of the
+        panel aligns with the right edge of the viewport — fully visible.
+        The transition above animates the change smoothly.
+      */
+    }
+
+    .mobile-overlay {
+      /*
+        A full-screen semi-transparent layer placed between the
+        page content and the nav panel. It dims the page content
+        so the user's attention goes to the open nav panel.
+        Clicking the overlay closes the nav (via onclick="closeMobileNav()").
+      */
+      display: none;
+      /* Hidden by default — shown only when nav is open */
+
+      position: fixed;
+      inset: 0;
+      /*
+        inset: 0 is shorthand for top: 0; right: 0; bottom: 0; left: 0.
+        Makes the overlay cover the entire viewport.
+      */
+
+      background: rgba(0,0,0,0.45);
+      /* Black at 45% opacity — dims but doesn't fully hide the page */
+
+      z-index: 998;
+      /* Behind the nav panel (999) but above all page content */
+    }
+
+    .mobile-overlay.show {
+      display: block;
+      /* JavaScript adds class="show" to make the overlay visible */
+    }
+
+    .mobile-nav-close {
+      /*
+        The × (times/close) button inside the top of the nav panel.
+      */
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      /*
+        Positioned relative to the nav panel (which has position: fixed).
+        Sits 20px from the top and 20px from the right edge of the panel.
+      */
+
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      /* 50% border-radius on a square element = perfect circle */
+
+      background: rgba(255,255,255,0.08);
+      /* Nearly invisible light fill — just a hint of the button shape */
+
+      border: 1px solid rgba(255,255,255,0.12);
+      /* Faint white border to define the button edges */
+
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Centers the × character both horizontally and vertically */
+
+      transition: background .2s;
+    }
+
+    .mobile-nav-close:hover {
+      background: rgba(255,255,255,0.15);
+      /* Brightens slightly on hover — indicates it's clickable */
+    }
+
+    .mobile-nav-label {
+      /*
+        The small "NAVIGATION" label at the very top of the nav panel,
+        above the links. Purely decorative.
+      */
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      /* Wide letter spacing creates an elegant all-caps label effect */
+
+      text-transform: uppercase;
+      /* Forces text to all caps regardless of how it's typed in HTML */
+
+      color: rgba(255,255,255,0.3);
+      /* Muted — not meant to compete with the nav links */
+
+      margin-bottom: 24px;
+    }
+
+    .mobile-nav a {
+      text-decoration: none;
+      color: rgba(255,255,255,0.85);
+      /* Bright white, slightly transparent — feels lighter than pure white */
+
+      font-size: 1.5rem;
+      /* Large text — easy to tap on a phone, prominent and clear */
+
+      font-weight: 700;
+
+      margin-bottom: 6px;
+      padding: 10px 0;
+      /* 10px top/bottom padding increases the tap target area */
+
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      /* Ultra-subtle divider line between each link */
+
+      transition: color .2s, padding-left .2s;
+      /* Animates both the color and the indent on hover */
+
+      display: block;
+      /* Makes the link fill the full width of the panel */
+    }
+
+    .mobile-nav a:hover {
+      color: var(--accent);
+      padding-left: 6px;
+      /*
+        On hover: turns blue AND nudges right by 6px.
+        The subtle indent gives a sense of selection/motion.
+        The transition above makes both changes animate smoothly.
+      */
+    }
+
+    .mobile-nav a.active {
+      color: var(--accent);
+      /* Accent color marks the current page in the mobile nav */
+    }
+
+    .mobile-nav-cta {
+      margin-top: auto;
+      /*
+        margin-top: auto on a flex child pushes it to the very bottom
+        of the flex container. No matter how many links are in the nav,
+        the CTA button always stays at the bottom of the panel.
+      */
+      padding-top: 28px;
+      /* Space above the CTA so it doesn't crowd the last link */
+    }
+
+    .mobile-nav-cta a {
+      display: block;
+      text-align: center;
+      padding: 14px;
+      background: var(--accent);
+      color: #fff !important;
+      /*
+        !important overrides the color set by .mobile-nav a above.
+        Without it, the CTA link would inherit the semi-transparent
+        white color and not show the correct white-on-blue style.
+      */
+
+      border-radius: 12px;
+      font-size: 1rem !important;
+      border-bottom: none !important;
+      padding-left: 0 !important;
+      /*
+        These !important declarations override the .mobile-nav a styles
+        (font-size, border-bottom, padding-left) that would otherwise
+        apply to this link since it's also inside .mobile-nav.
+        Using !important here is acceptable because we specifically need
+        to override inherited styles for this one element.
+      */
+    }
+
+
+    /* ===========================================================
+       5. HERO SECTION — SLIDESHOW
+       ============================================================
+       The hero is the first full-screen section the visitor sees.
+       It has three layers stacked on top of each other using
+       position: absolute and z-index:
+
+         z-index 0-1 : .hero-slide divs (images or gradients)
+         z-index 2   : ::before overlay (dark dimming layer)
+         z-index 3   : .hero-content (text and buttons)
+
+       JavaScript controls which slide is .active.
+    =========================================================== */
+
+    .hero {
+      position: relative;
+      /*
+        position: relative makes this element the "positioning context"
+        for its absolutely-positioned children (the slides).
+      */
+
+      min-height: 92vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+
+      padding: 120px 24px 100px;
+
+      overflow: hidden;
+
+      background: #060611;
+      /* Deep dark navy — fallback color if slides fail to load */
+    }
+
+    .hero-slide {
+      /*
+        Each slide is a full-size layer stacked inside the hero.
+        All slides sit on top of each other at the same position.
+        Only the .active one is visible (opacity: 1).
+      */
+      position: absolute;
+      inset: 0;
+
+      opacity: 0;
+      transition: opacity 1.2s ease;
+
+      z-index: 0;
+      background: #060611;
+    }
+
+    .hero-slide.active {
+      opacity: 1;
+      z-index: 1;
+      /*
+        The active slide becomes fully visible and sits on top
+        of the inactive slides (z-index 0).
+      */
+    }
+
+    /*
+      ─────────────────────────────────────────────────────────────
+      HOW TO ADD YOUR OWN IMAGE OR VIDEO TO A SLIDE
+      ─────────────────────────────────────────────────────────────
+      OPTION A — CSS background image:
+        .hero-slide:nth-child(1) {
+          background-image: url('images/slide1.jpg');
+          background-size: cover;
+          background-position: center;
+        }
+
+      OPTION B — <img> tag inside the slide div:
+        <div class="hero-slide active">
+          <img src="images/slide1.jpg" class="slide-media" alt="..." />
+        </div>
+
+      OPTION C — <video> tag inside the slide div:
+        <div class="hero-slide active">
+          <video src="media/reel.mp4" class="slide-media"
+                 autoplay muted loop playsinline></video>
+        </div>
+
+      Use class="slide-media" on either — the CSS below makes
+      it fill the slide completely with no stretching.
+      ─────────────────────────────────────────────────────────────
+    */
+
+    .slide-media {
+      /*
+        Applied to any <img> or <video> placed inside a slide.
+        Makes the media fill the entire slide like a background image.
+      */
+      position: absolute;
+      inset: 0;
+      /* Stretch to all four edges of the slide */
+
+      width: 100%;
+      height: 100%;
+
+      object-fit: cover;
+      /*
+        object-fit: cover is the key property here.
+        It makes the media fill its container completely while
+        maintaining its aspect ratio — cropping the edges if
+        needed rather than distorting/stretching the image.
+        Works just like background-size: cover but for <img>/<video>.
+      */
+
+      object-position: center;
+      /* Keeps the center of the image/video in view when cropping */
+    }
+
+
+    .hero::before {
+      /*
+        This is a CSS pseudo-element. ::before inserts a layer
+        BEFORE the hero's content but INSIDE the hero element.
+        It acts as a dark transparent overlay that sits on top of
+        the slides and behind the text content.
+
+        Purpose: if the hero image is bright, the overlay darkens
+        it enough so that white text stays legible on top of it.
+      */
+      content: "";
+      /* Required for ::before to render — even an empty string */
+
+      position: absolute;
+      inset: 0;
+      /* Covers the entire hero section */
+
+      background: rgba(6,6,17,0.5);
+      /* Very dark navy at 50% opacity — darkens slides without hiding them */
+
+      z-index: 2;
+      /* Above slides (z-index 1) but below text content (z-index 3) */
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 3;
+      max-width: 840px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* Stacks eyebrow, slide-text area, and buttons vertically */
+    }
+
+    /* Container that holds the stacked slide-text blocks */
+    .slide-text-wrapper {
+      position: relative;
+      width: 100%;
+      min-height: 260px;
+      /* Reserves space so the absolutely-positioned texts don't overlap buttons */
+      margin-bottom: 32px;
+    }
+
+    .hero-eyebrow {
+      /*
+        The small pill-shaped label above the main headline.
+        Example: "ITD 110 · Web Design · NOVA Annandale"
+      */
+      display: inline-block;
+      /* Allows padding — inline elements ignore padding/margin */
+
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      /* Small, bold, widely-spaced caps = the classic "eyebrow" label */
+
+      color: var(--accent);
+      /* Blue text on the dark hero background */
+
+      background: rgba(74,144,226,0.14);
+      /* Very faint blue fill — tinted but mostly transparent */
+
+      border: 1px solid rgba(74,144,226,0.35);
+      /* Subtle blue border defines the pill shape */
+
+      padding: 6px 18px;
+      border-radius: 999px;
+      /* Pill shape via large border-radius */
+
+      margin-bottom: 22px;
+      /* Space between the eyebrow and the headline below it */
+    }
+
+    .hero h1 {
+      font-size: clamp(2.6rem, 6.5vw, 4.8rem);
+      /*
+        clamp(min, preferred, max) — responsive font sizing.
+        - Minimum: 2.6rem (never smaller than this, even on tiny phones)
+        - Preferred: 6.5vw (scales with viewport width)
+        - Maximum: 4.8rem (never larger than this, even on huge screens)
+
+        This replaces needing multiple media queries for font size.
+        The heading automatically finds the right size for any screen.
+      */
+
+      font-weight: 900;
+      /* Maximum font weight — creates a strong visual impact */
+
+      color: #fff;
+
+      line-height: 1.08;
+      /* Tight line height — appropriate for very large display text */
+
+      letter-spacing: -.025em;
+      /* Slight negative tracking — large text looks better tighter */
+
+      margin-bottom: 22px;
+
+      /* Gradient text effect — text is filled with a gradient
+         instead of a solid color */
+      background: linear-gradient(130deg, #ffffff 45%, rgba(147,210,255,0.8));
+      /*
+        Creates a gradient from pure white (45% of the way through)
+        to a translucent light blue. On large bold text, this gives
+        a subtle depth — top of letters slightly whiter, bottom slightly blue.
+      */
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      /*
+        Clips the background gradient to the shape of the text characters.
+        Without this, the gradient would fill the whole element background.
+      */
+
+      -webkit-text-fill-color: transparent;
+      /*
+        Makes the text itself transparent so the clipped gradient
+        shows through. -webkit- prefix required for Safari/Chrome.
+        The standard property (color: transparent) doesn't work
+        the same way, so this webkit version is used instead.
+      */
+    }
+
+    .hero-sub {
+      /*
+        The subtitle paragraph below the headline.
+      */
+      font-size: clamp(1rem, 2.2vw, 1.3rem);
+      /* Responsive size — scales between 16px and ~21px */
+
+      color: rgba(255,255,255,0.6);
+      /* 60% opaque white — softer than the headline, secondary importance */
+
+      max-width: 520px;
+      /* Narrower than the headline for comfortable reading line length */
+
+      margin: 0 auto 42px;
+      /* 0 top, auto left/right (centers it), 42px bottom spacing */
+
+      line-height: 1.7;
+      /* Generous line height for multi-line subtitle text */
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      /* Puts the two CTA buttons side by side, centered */
+
+      flex-wrap: wrap;
+      /* On very narrow screens, buttons stack vertically */
+    }
+
+    .btn-primary {
+      /*
+        The main filled pill button — used in the hero and feature sections.
+      */
+      display: inline-block;
+      padding: 15px 36px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: .98rem;
+      transition: background .25s, transform .25s, box-shadow .25s;
+      /* Three properties animate simultaneously on hover */
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dark);
+      /* Darkens to --accent-dark on hover */
+
+      transform: translateY(-3px);
+      /* Moves up 3px — the "lift" effect */
+
+      box-shadow: 0 14px 32px rgba(74,144,226,0.45);
+      /* Blue-tinted shadow appears below the lifted button */
+    }
+
+    .btn-secondary {
+      /*
+        The outlined/ghost pill button — used alongside btn-primary.
+      */
+      display: inline-block;
+      padding: 14px 36px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255,255,255,0.28);
+      /* Semi-transparent white border — visible on dark hero bg */
+
+      color: rgba(255,255,255,0.85);
+      /* Slightly transparent white text */
+
+      text-decoration: none;
+      font-weight: 600;
+      font-size: .98rem;
+      transition: border-color .25s, color .25s, transform .25s;
+    }
+
+    .btn-secondary:hover {
+      border-color: rgba(255,255,255,0.8);
+      /* Border brightens to near-solid white on hover */
+
+      color: #fff;
+      /* Text becomes fully white */
+
+      transform: translateY(-3px);
+      /* Same lift as btn-primary for visual consistency */
+    }
+
+    
+
+    /* ── Per-slide text: unique caption for each slide ── */
+    .slide-text {
+      /*
+        Each .slide-text sits inside .slide-text-wrapper.
+        They stack on top of each other via position: absolute.
+        Only the .active one fades in.
+      */
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+
+      opacity: 0;
+      transition: opacity 1.2s ease;
+
+      pointer-events: none;
+    }
+
+    .slide-text.active {
+      opacity: 1;
+      pointer-events: auto;
+      /* Active text is visible and clickable */
+    }
+
+    .slide-text h2 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .slide-text p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: rgba(255,255,255,0.7);
+      max-width: 520px;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+
+    /* ===========================================================
+       6. SECTION LABELS & SHARED HELPERS
+       ============================================================
+       Reusable utility classes used across all content sections.
+       Defining them once here keeps every section consistent.
+    =========================================================== */
+
+    .section-label {
+      /*
+        The small all-caps label above each section heading.
+        Example: "FEATURED WORK" or "WHAT I BUILD"
+      */
+      display: block;
+      /* Puts the label on its own line above the heading */
+
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      /* Wide letter spacing creates visual refinement */
+
+      text-transform: uppercase;
+      color: var(--accent);
+      /* Blue accent label matching the site's color system */
+
+      margin-bottom: 10px;
+    }
+
+    .section-heading {
+      font-size: clamp(1.7rem, 3.2vw, 2.5rem);
+      /* Responsive — scales between 27px and 40px */
+
+      font-weight: 800;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+
+    .section-sub {
+      /*
+        The descriptive paragraph below section headings.
+      */
+      font-size: 1.05rem;
+      color: #556;
+      /* Medium-dark gray — secondary text, not as prominent as headings */
+
+      line-height: 1.7;
+      max-width: 600px;
+      /* Limits line length for better readability */
+    }
+
+    .inner {
+      /*
+        A reusable container class used inside skills section.
+        Centers content and caps it at 1180px so text doesn't
+        stretch uncomfortably wide on large monitors.
+      */
+      max-width: 1180px;
+      margin: 0 auto;
+      /* Centers the container within any parent element */
+
+      padding: 0 24px;
+      /* Side padding so content doesn't touch screen edges on mobile */
+    }
+
+    .section {
+      /*
+        Shared padding applied to all content sections
+        via class="section" in the HTML.
+      */
+      padding: 100px 24px;
+      /* 100px top/bottom (generous breathing room), 24px sides */
+
+      border-top: 1px solid var(--soft-border);
+      /* Thin line separates adjacent sections */
+    }
+
+    .section.white { background: var(--white); }
+    .section.gray  { background: var(--light-bg); }
+    /* Alternating section backgrounds so content sections are visually distinct */
+
+
+    /* ===========================================================
+       7. FEATURE SPLIT SECTIONS
+       ============================================================
+       A two-column grid with text on one side and an image
+       placeholder on the other. The .reverse modifier flips
+       the column order for the second section.
+    =========================================================== */
+
+    .feature-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      /*
+        Creates two equal columns.
+        1fr = one fraction of available space.
+        Two 1fr columns divide the space equally (50%/50%).
+      */
+
+      gap: 64px;
+      /* 64px of space between the text column and image column */
+
+      align-items: center;
+      /* Vertically centers both columns relative to each other */
+    }
+
+    .feature-inner.reverse {
+      direction: rtl;
+      /*
+        Reverses column order visually — creates the Z-pattern
+        where section 1 is image-left/text-right and section 2
+        is text-left/image-right, so the layout alternates.
+      */
+    }
+
+    .feature-inner.reverse > * {
+      direction: ltr;
+      /* Reset text direction inside the reversed columns */
+    }
+
+    .feature-text {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      /* Stacks label, heading, paragraph, and button vertically with 16px between each */
+    }
+
+    .feature-visual .placeholder {
+      /*
+        Dark gradient block shown before a real screenshot is added.
+        Replace by adding an <img> tag inside .feature-visual.
+      */
+      width: 100%;
+      min-height: 340px;
+      border-radius: 24px;
+      /* Large rounded corners — matches the card style */
+
+      background: linear-gradient(135deg, #080d2a, #0a1f3a);
+      /* Dark blue gradient — a placeholder until a real image is added */
+
+      box-shadow: var(--card-shadow);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Centers the placeholder text label */
+
+      color: rgba(255,255,255,0.2);
+      /* Very dim text — clearly a placeholder, not real content */
+
+      font-size: .85rem;
+      text-align: center;
+      padding: 24px;
+    }
+
+
+    /* ===========================================================
+       8. PROJECT CARDS
+       ============================================================
+       An auto-filling grid of project cards.
+       Each card has a thumbnail image on top and a text body below.
+       Hovering lifts the card and grows its shadow.
+    =========================================================== */
+
+    .projects-header {
+      /*
+        The row above the card grid containing the heading
+        and "View all →" link.
+      */
+      max-width: 1180px;
+      margin: 0 auto 48px;
+      /* 48px bottom margin separates this header from the card grid */
+
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      /* Aligns heading (taller) and link (shorter) to their bottom edges */
+
+      gap: 20px;
+      flex-wrap: wrap;
+      /* Stacks on narrow screens */
+    }
+
+    .view-all {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: .9rem;
+      transition: color .2s;
+    }
+    .view-all:hover { color: var(--accent-dark); }
+
+    .project-grid {
+      max-width: 1180px;
+      margin: 0 auto;
+
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      /*
+        repeat(auto-fit, minmax(300px, 1fr)) creates a responsive
+        grid without needing breakpoints:
+
+        auto-fit     → create as many columns as fit in the row
+        minmax(300px, 1fr) → each column is at least 300px wide
+                             but can grow to fill available space (1fr)
+
+        With 3 cards at 1180px wide, this creates 3 columns (~360px each).
+        On a 700px screen, it creates 2 columns (~300px each).
+        On a phone, it creates 1 full-width column.
+      */
+
+      gap: 26px;
+      /* Space between cards */
+    }
+
+    .project-card {
+      background: var(--white);
+      border-radius: 22px;
+      /* Large rounded corners for a modern card look */
+
+      border: 1px solid var(--soft-border);
+      /* Faint border defines the card edge on the white page background */
+
+      overflow: hidden;
+      /*
+        IMPORTANT: this clips the thumbnail image to the card's
+        border-radius. Without overflow: hidden, the image corners
+        would stick out past the rounded card corners.
+      */
+
+      transition: transform .3s ease, box-shadow .3s ease;
+      /* Animates the lift + shadow on hover over 0.3 seconds */
+
+      text-decoration: none;
+      /* The whole card is an <a> tag — this removes the underline */
+
+      color: inherit;
+      /* Inherits the page text color instead of the default link blue */
+
+      display: block;
+      /* Makes the <a> tag fill its grid cell completely */
+    }
+
+    .project-card:hover {
+      transform: translateY(-8px);
+      /* Lifts the card 8px upward on hover */
+
+      box-shadow: var(--card-shadow);
+      /* Shadow appears below the lifted card, reinforcing the lift effect */
+    }
+
+    .card-thumb {
+      height: 200px;
+      /* Fixed height keeps all thumbnails the same size */
+
+      position: relative;
+      /*
+        position: relative makes .card-tag (the category pill)
+        position relative to this thumbnail, not the whole page.
+      */
+
+      overflow: hidden;
+      /* Clips the img to the card-thumb boundaries */
+
+      background: linear-gradient(135deg, #0a1030, #0d1f40);
+      /* Dark fallback if image fails to load */
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Fills the 200px tall thumbnail without distorting the image */
+
+      transition: transform .4s ease;
+      /* Smooth zoom animation on hover (see rule below) */
+    }
+
+    .project-card:hover .card-thumb img {
+      transform: scale(1.05);
+      /*
+        When the card is hovered, the image inside scales up 5%.
+        Because .card-thumb has overflow: hidden, the zoom stays
+        clipped inside the card boundaries — creating a subtle
+        "zoom in" effect on hover.
+      */
+    }
+
+    .card-tag {
+      /*
+        The small category pill overlaid on the top-left of the thumbnail.
+        Example: "HTML / CSS" or "Responsive Layout"
+      */
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      /* Positioned 14px from the top-left corner of the thumbnail */
+
+      padding: 4px 12px;
+      border-radius: 999px;
+
+      background: rgba(0,0,0,0.6);
+      /* Dark semi-transparent background — readable over any image */
+
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+
+      backdrop-filter: blur(8px);
+      /* Frosted glass effect on the tag — blurs the image behind it */
+    }
+
+    .card-body {
+      padding: 22px 24px 26px;
+      /* 22px top, 24px sides, 26px bottom — comfortable card body spacing */
+    }
+
+    .card-body h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      /* Project name — bold and slightly larger than description */
+    }
+
+    .card-body p {
+      font-size: .9rem;
+      color: #667;
+      /* Muted gray — secondary text below the project title */
+
+      line-height: 1.55;
+    }
+
+
+    /* ===========================================================
+       10. CTA BAND
+       ============================================================
+       Call-to-action section near the bottom of the page.
+       Heading on the left, button on the right.
+    =========================================================== */
+
+    .cta-band {
+      background: var(#e8eaf0);
+      border-top: 1px solid var(--soft-border);
+      padding: 80px 24px;
+    }
+
+    .cta-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      /* Heading left, button right, both vertically centered */
+
+      gap: 32px;
+      flex-wrap: wrap;
+      /* Stacks on narrow screens */
+    }
+
+    .cta-text h2 {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .cta-text p {
+      color: #556;
+      max-width: 480px;
+    }
+
+
+    /* ===========================================================
+       11. FOOTER
+    =========================================================== */
+
+    footer {
+      background: #060611;
+      /* Same deep dark navy as the hero bottom — visual bookend */
+
+      color: rgba(255,255,255,0.35);
+      /* Muted text — footer is not a focus area */
+
+      text-align: center;
+      padding: 28px 24px;
+      font-size: .84rem;
+    }
+
+    footer a {
+      color: rgba(255,255,255,0.35);
+      text-decoration: none;
+    }
+
+
+    /* ===========================================================
+       12. SCROLL FADE-UP ANIMATIONS
+       ============================================================
+       Elements with class="fade-up" start invisible and shifted
+       downward. When JavaScript detects them entering the viewport,
+       it adds class="visible" which triggers the CSS transition.
+
+       HOW IT WORKS:
+         1. An element has class="fade-up" — starts invisible
+         2. User scrolls down
+         3. JavaScript IntersectionObserver detects the element
+            entering the viewport
+         4. JavaScript adds class="visible" to the element
+         5. CSS transitions opacity from 0→1 and translateY from
+            36px→0 simultaneously — element fades up into place
+    =========================================================== */
+
+    .fade-up {
+      opacity: 0;
+      /* Starts invisible */
+
+      transform: translateY(36px);
+      /* Starts 36px below its final position */
+
+      transition: opacity .8s ease, transform .8s ease;
+      /*
+        Both opacity and transform animate over 0.8 seconds.
+        The ease curve starts slow, speeds up, then slows again —
+        a natural, physical-feeling motion.
+      */
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      /* Fades fully into view */
+
+      transform: translateY(0);
+      /* Moves to its natural position */
+    }
+
+    /* Staggered delays for grid children — each card starts
+       slightly after the previous one for a wave effect */
+    .fade-up:nth-child(2) { transition-delay: .08s; }
+    .fade-up:nth-child(3) { transition-delay: .16s; }
+    .fade-up:nth-child(4) { transition-delay: .24s; }
+    .fade-up:nth-child(5) { transition-delay: .32s; }
+    .fade-up:nth-child(6) { transition-delay: .40s; }
+
+
+    /* ===========================================================
+       13. RESPONSIVE BREAKPOINTS
+       ============================================================
+       Media queries apply styles only when the screen is a
+       certain width. @media (max-width: 900px) means: "apply
+       these styles only when the screen is 900px wide or less."
+
+       We use TWO breakpoints:
+         900px — switches from desktop to tablet/mobile layout
+         600px — fine-tunes for very small phones
+    =========================================================== */
+
+    @media (max-width: 900px) {
+
+      .desktop-nav { display: none; }
+      /* Hides the desktop navigation links on mobile */
+
+      .header-cta { display: none; }
+      /* Hides the header CTA button — replaced by mobile nav CTA */
+
+      .mobile-toggle { display: flex; }
+      /* Shows the hamburger button on mobile */
+
+      .feature-inner {
+        grid-template-columns: 1fr;
+        /* Collapses two columns to one on mobile */
+
+        gap: 32px;
+        /* Less gap needed when stacked vertically */
+      }
+
+      .feature-inner.reverse {
+        direction: ltr;
+        /* On mobile, stacks normally instead of reversing */
+      }
+
+      .cta-inner {
+        flex-direction: column;
+        /* Stacks CTA heading and button vertically on mobile */
+
+        text-align: center;
+      }
+
+      .projects-header {
+        flex-direction: column;
+        /* Stacks section heading and "View all" link vertically */
+
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 0 20px; }
+      /* Less side padding on very narrow phones */
+
+      .hero { padding: 100px 16px 80px; }
+      /* Less padding on tiny screens */
+    }
